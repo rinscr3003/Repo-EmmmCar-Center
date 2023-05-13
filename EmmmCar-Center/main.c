@@ -202,7 +202,7 @@ int main(void)
   uint8_t stopped = 0;
   while (1)
   {
-    if (getSysPeriod() >= 11000 && !stopped)
+    if (getSysPeriod() >= 15000 && !stopped)
     {
       gpio_bit_reset(GPIOB, GPIO_PIN_6);
       delay_1ms(1);
