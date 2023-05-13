@@ -632,15 +632,47 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Utilities</GroupName>
-        </Group>
-        <Group>
-          <GroupName>Doc</GroupName>
+          <GroupName>BSP_EmmCar-Center</GroupName>
           <Files>
             <File>
-              <FileName>readme.txt</FileName>
+              <FileName>bsp_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_spi.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\readme.txt</FilePath>
+              <FilePath>..\BSP\bsp_spi.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fdetect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_fdetect.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fdetect.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_fdetect.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledbuz.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_ledbuz.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledbuz.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_ledbuz.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_linefind.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_linefind.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_linefind.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_linefind.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1275,15 +1307,47 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Utilities</GroupName>
-        </Group>
-        <Group>
-          <GroupName>Doc</GroupName>
+          <GroupName>BSP_EmmCar-Center</GroupName>
           <Files>
             <File>
-              <FileName>readme.txt</FileName>
+              <FileName>bsp_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_spi.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\readme.txt</FilePath>
+              <FilePath>..\BSP\bsp_spi.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fdetect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_fdetect.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fdetect.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_fdetect.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledbuz.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_ledbuz.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledbuz.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_ledbuz.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_linefind.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_linefind.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_linefind.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_linefind.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1627,7 +1691,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,GD32F30X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Firmware\CMSIS;..\..\Firmware\CMSIS\GD\GD32F30x\Include;..\..\Firmware\GD32F30x_standard_peripheral\Include;..\..\Utilities;..\</IncludePath>
+              <IncludePath>..\..\Firmware\CMSIS;..\..\Firmware\CMSIS\GD\GD32F30x\Include;..\..\Firmware\GD32F30x_standard_peripheral\Include;..\BSP;..\</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1920,15 +1984,47 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Utilities</GroupName>
-        </Group>
-        <Group>
-          <GroupName>Doc</GroupName>
+          <GroupName>BSP_EmmCar-Center</GroupName>
           <Files>
             <File>
-              <FileName>readme.txt</FileName>
+              <FileName>bsp_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_spi.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\readme.txt</FilePath>
+              <FilePath>..\BSP\bsp_spi.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fdetect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_fdetect.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_fdetect.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_fdetect.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledbuz.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_ledbuz.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledbuz.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_ledbuz.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_linefind.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\BSP\bsp_linefind.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_linefind.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\bsp_linefind.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1953,5 +2049,14 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>Project</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

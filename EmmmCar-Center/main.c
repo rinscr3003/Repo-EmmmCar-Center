@@ -40,6 +40,11 @@ OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdint.h>
 
+#include "bsp_fdetect.h"
+#include "bsp_spi.h"
+#include "bsp_ledbuz.h"
+#include "bsp_linefind.h"
+
 void gd_log_com_init()
 {
   /* enable COM GPIO clock */
@@ -62,19 +67,6 @@ void gd_log_com_init()
   usart_enable(USART0);
 }
 
-typedef enum
-{
-  SPICMD_SETMOTORPWM = 1,
-  SPICMD_SETGIVENSPEED,
-  SPICMD_SETPWMS,
-  SPICMD_SETSPEEDS,
-  SPICMD_GETSPEED,
-  SPICMD_GETSPEEDS,
-  SPICMD_GETPIDSTATE,
-  SPICMD_SETPIDSTATE,
-  SPICMD_MAXCMDINDEX
-} _SPIPROC_CMDCODE;
-
 /*!
     \brief      main function
     \param[in]  none
@@ -89,61 +81,11 @@ int main(void)
   systick_config();
   gd_log_com_init();
 
-  rcu_periph_clock_enable(RCU_GPIOA);
-  rcu_periph_clock_enable(RCU_AF);
-  gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
-  timer_oc_parameter_struct timer_ocintpara;
-  timer_parameter_struct timer_initpara;
-  rcu_periph_clock_enable(RCU_TIMER2);
-  timer_deinit(TIMER2);
-  timer_initpara.prescaler = 119;
-  timer_initpara.alignedmode = TIMER_COUNTER_EDGE;
-  timer_initpara.counterdirection = TIMER_COUNTER_UP;
-  timer_initpara.period = 4999;
-  timer_initpara.clockdivision = TIMER_CKDIV_DIV1;
-  timer_initpara.repetitioncounter = 0;
-  timer_init(TIMER2, &timer_initpara);
+  BSP_FDetect_Init();
+  BSP_SPI_Init();
+  BSP_LEDBUZ_Init();
+  BSP_LineFind_Init();
 
-  /* CH0,CH1 and CH2 configuration in PWM mode */
-  timer_ocintpara.outputstate = TIMER_CCX_ENABLE;
-  timer_ocintpara.outputnstate = TIMER_CCXN_DISABLE;
-  timer_ocintpara.ocpolarity = TIMER_OC_POLARITY_HIGH;
-  timer_ocintpara.ocnpolarity = TIMER_OCN_POLARITY_HIGH;
-  timer_ocintpara.ocidlestate = TIMER_OC_IDLE_STATE_LOW;
-  timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
-
-  timer_channel_output_config(TIMER2, TIMER_CH_0, &timer_ocintpara);
-
-  /* CH0 configuration in PWM mode0,duty cycle 25% */
-  timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_0, 1500);
-  timer_channel_output_mode_config(TIMER2, TIMER_CH_0, TIMER_OC_MODE_PWM0);
-  timer_channel_output_shadow_config(TIMER2, TIMER_CH_0, TIMER_OC_SHADOW_ENABLE);
-
-  /* auto-reload preload enable */
-  timer_auto_reload_shadow_enable(TIMER2);
-  /* auto-reload preload enable */
-  timer_enable(TIMER2);
-
-  rcu_periph_clock_enable(RCU_GPIOB);
-  rcu_periph_clock_enable(RCU_SPI2);
-  rcu_periph_clock_enable(RCU_AF);
-  gpio_pin_remap_config(GPIO_SWJ_SWDPENABLE_REMAP, ENABLE);
-  gpio_init(GPIOB, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3 | GPIO_PIN_5);
-  gpio_init(GPIOB, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_4);
-  gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
-  gpio_bit_set(GPIOB, GPIO_PIN_6);
-  spi_i2s_deinit(SPI2);
-  spi_parameter_struct spi_init_struct;
-  /* SPI0 parameter config */
-  spi_init_struct.trans_mode = SPI_TRANSMODE_FULLDUPLEX;
-  spi_init_struct.device_mode = SPI_MASTER;
-  spi_init_struct.frame_size = SPI_FRAMESIZE_8BIT;
-  spi_init_struct.clock_polarity_phase = SPI_CK_PL_HIGH_PH_2EDGE;
-  spi_init_struct.nss = SPI_NSS_SOFT;
-  spi_init_struct.prescale = SPI_PSC_16;
-  spi_init_struct.endian = SPI_ENDIAN_MSB;
-  spi_init(SPI2, &spi_init_struct);
-  spi_enable(SPI2);
   delay_1ms(10);
 
   /* print out the clock frequency of system, AHB, APB1 and APB2 */
@@ -152,113 +94,32 @@ int main(void)
   printf("\r\nCK_APB1 is %d", rcu_clock_freq_get(CK_APB1));
   printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
 
-  delay_1ms(1300);
+  delay_1ms(1000);
+  BSP_FDetect_SetAngle(-90);
+  delay_1ms(1000);
+  BSP_FDetect_SetAngle(90);
+  delay_1ms(1000);
+  BSP_FDetect_SetAngle(0);
 
-  for (uint16_t i = 500; i < 2500; i++)
-  {
-    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_0, i);
-    delay_1ms(1);
-  }
-  for (uint16_t i = 2500; i > 500; i--)
-  {
-    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_0, i);
-    delay_1ms(1);
-  }
-  timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_0, 1500);
+  BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 1);
 
-  rcu_periph_clock_enable(RCU_GPIOC);
-  gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4 | GPIO_PIN_5);
-  gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-  gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
-  while (0 == gpio_input_bit_get(GPIOA, GPIO_PIN_7))
-  {
-    delay_1ms(150);
-    gpio_bit_set(GPIOC, GPIO_PIN_5);
-    delay_1ms(150);
-    gpio_bit_reset(GPIOC, GPIO_PIN_5);
-  }
-  gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-  delay_1ms(700);
-  gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-
-  uint8_t spicmds[5] = {SPICMD_SETSPEEDS, 40, 40, 40, 40};
-  gpio_bit_reset(GPIOB, GPIO_PIN_6);
-  delay_1ms(1);
-  for (uint8_t i = 0; i < 5; i++)
-  {
-    while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE))
-    {
-      ;
-    }
-    spi_i2s_data_transmit(SPI2, spicmds[i]);
-  }
-  while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TRANS))
-  {
-    ;
-  }
-  delay_1ms(1);
-  gpio_bit_set(GPIOB, GPIO_PIN_6);
+  float speeds[4] = {4.0, 4.0, 4.0, 4.0};
+  BSP_SPI_SetSpeeds(speeds);
 
   uint8_t stopped = 0;
   while (1)
   {
+    if (BSP_FDetect_Read() && !stopped)
+    {
+      BSP_SPI_AllBrake();
+      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 300, 3);
+      stopped = 1;
+    }
     if (getSysPeriod() >= 15000 && !stopped)
     {
-      gpio_bit_reset(GPIOB, GPIO_PIN_6);
-      delay_1ms(1);
-      spicmds[1] = 0;
-      spicmds[2] = 0;
-      spicmds[3] = 0;
-      spicmds[4] = 0;
-      for (uint8_t i = 0; i < 5; i++)
-      {
-        while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE))
-        {
-          ;
-        }
-        spi_i2s_data_transmit(SPI2, spicmds[i]);
-      }
-      while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TRANS))
-      {
-        ;
-      }
-      delay_1ms(1);
-      gpio_bit_set(GPIOB, GPIO_PIN_6);
+      BSP_SPI_AllBrake();
+      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
       stopped = 1;
-      gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-      delay_1ms(500);
-      gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-      delay_1ms(500);
-      gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-      delay_1ms(500);
-      gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-    }
-    if (0 == gpio_input_bit_get(GPIOA, GPIO_PIN_7) && !stopped)
-    {
-      gpio_bit_reset(GPIOB, GPIO_PIN_6);
-      delay_1ms(1);
-      spicmds[1] = 0;
-      spicmds[2] = 0;
-      spicmds[3] = 0;
-      spicmds[4] = 0;
-      for (uint8_t i = 0; i < 5; i++)
-      {
-        while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE))
-        {
-          ;
-        }
-        spi_i2s_data_transmit(SPI2, spicmds[i]);
-      }
-      while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TRANS))
-      {
-        ;
-      }
-      delay_1ms(1);
-      gpio_bit_set(GPIOB, GPIO_PIN_6);
-      stopped = 1;
-      gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
-      delay_1ms(500);
-      gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
     }
   }
 }

@@ -1,5 +1,13 @@
 {
     "files.encoding": "gbk",
     "files.associations": {
+        "stdint.h": "c",
+        "bit": "c",
+        "compare": "c",
+        "cstddef": "c",
+        "limits": "c",
+        "type_traits": "c",
+        "xmemory": "c",
+        "xutility": "c"
     }
 }
