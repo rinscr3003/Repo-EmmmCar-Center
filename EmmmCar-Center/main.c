@@ -62,6 +62,19 @@ void gd_log_com_init()
     usart_enable(USART0);
 }
 
+typedef enum
+{
+    SPICMD_SETMOTORPWM = 1,
+    SPICMD_SETGIVENSPEED,
+    SPICMD_SETPWMS,
+    SPICMD_SETSPEEDS,
+    SPICMD_GETSPEED,
+    SPICMD_GETSPEEDS,
+    SPICMD_GETPIDSTATE,
+    SPICMD_SETPIDSTATE,
+    SPICMD_MAXCMDINDEX
+} _SPIPROC_CMDCODE;
+
 /*!
     \brief      main function
     \param[in]  none
@@ -74,7 +87,7 @@ int main(void)
 	SystemInit();
     /* configure systick */
     systick_config();
-    /* initilize the LEDs, USART and key */
+    gd_log_com_init();
 	
 	
 rcu_periph_clock_enable(RCU_GPIOA);
@@ -111,6 +124,25 @@ rcu_periph_clock_enable(RCU_GPIOA);
     timer_auto_reload_shadow_enable(TIMER2);
     /* auto-reload preload enable */
     timer_enable(TIMER2);
+		
+		rcu_periph_clock_enable(RCU_GPIOB); 
+    rcu_periph_clock_enable(RCU_SPI2);
+    rcu_periph_clock_enable(RCU_AF);
+		gpio_init(GPIOB, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3 | GPIO_PIN_5);
+    gpio_init(GPIOB, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_4);
+    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
+		spi_parameter_struct spi_init_struct;
+    /* SPI0 parameter config */
+    spi_init_struct.trans_mode           = SPI_TRANSMODE_FULLDUPLEX;
+    spi_init_struct.device_mode          = SPI_MASTER;
+    spi_init_struct.frame_size           = SPI_FRAMESIZE_8BIT;
+    spi_init_struct.clock_polarity_phase = SPI_CK_PL_LOW_PH_1EDGE;
+    spi_init_struct.nss                  = SPI_NSS_SOFT;
+    spi_init_struct.prescale             = SPI_PSC_16;
+    spi_init_struct.endian               = SPI_ENDIAN_MSB;
+    spi_init(SPI2, &spi_init_struct);
+		gpio_bit_set(GPIOB,GPIO_PIN_6);
+		spi_enable(SPI2);
     
     /* print out the clock frequency of system, AHB, APB1 and APB2 */
     printf("\r\nCK_SYS is %d", rcu_clock_freq_get(CK_SYS));
@@ -118,10 +150,9 @@ rcu_periph_clock_enable(RCU_GPIOA);
     printf("\r\nCK_APB1 is %d", rcu_clock_freq_get(CK_APB1));
     printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
 
-delay_1ms(2000);
+delay_1ms(1300);
 
-    while (1){
-        for(uint16_t i=500;i<2500;i++){
+for(uint16_t i=500;i<2500;i++){
 					timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_0,i);
 					delay_1ms(1);
 				}
@@ -129,6 +160,35 @@ delay_1ms(2000);
 					timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_0,i);
 					delay_1ms(1);
 				}
+timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_0,1500);
+				
+				uint8_t spicmds[5]={SPICMD_SETSPEEDS,40,40,40,40};
+				gpio_bit_reset(GPIOB,GPIO_PIN_6);
+				delay_1ms(1);
+				for(uint8_t i=0;i<5;i++){
+				while(RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE)){;}
+        spi_i2s_data_transmit(SPI2, spicmds[i]);
+				}
+				delay_1ms(1);
+				gpio_bit_set(GPIOB,GPIO_PIN_6);
+				uint8_t stopped=0;
+    while (1){
+			if(getSysPeriod()>=11000 && !stopped){
+				gpio_bit_reset(GPIOB,GPIO_PIN_6);
+				delay_1ms(1);
+				spicmds[1]=0;
+				spicmds[2]=0;
+				spicmds[3]=0;
+				spicmds[4]=0;
+				for(uint8_t i=0;i<5;i++){
+				while(RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE)){;}
+        spi_i2s_data_transmit(SPI2, spicmds[i]);
+				}
+				delay_1ms(1);
+				gpio_bit_set(GPIOB,GPIO_PIN_6);
+				stopped=1;
+			}
+
     }
 }
 

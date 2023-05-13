@@ -44,6 +44,7 @@ OF SUCH DAMAGE.
 void systick_config(void);
 /* delay a time in milliseconds */
 void delay_1ms(uint32_t count);
+uint32_t getSysPeriod();
 /* delay decrement */
 void delay_decrement(void);
 

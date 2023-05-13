@@ -39,6 +39,7 @@ OF SUCH DAMAGE.
 #include "systick.h"
 
 volatile static uint32_t delay;
+volatile static uint32_t sysperiod = 0;
 
 /*!
     \brief      configure systick
@@ -72,6 +73,11 @@ void delay_1ms(uint32_t count)
     }
 }
 
+uint32_t getSysPeriod()
+{
+    return sysperiod;
+}
+
 /*!
     \brief      delay decrement
     \param[in]  none
@@ -83,4 +89,5 @@ void delay_decrement(void)
     if (0U != delay){
         delay--;
     }
+		sysperiod++;
 }
