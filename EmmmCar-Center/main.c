@@ -166,6 +166,21 @@ int main(void)
   }
   timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_0, 1500);
 
+  rcu_periph_clock_enable(RCU_GPIOC);
+  gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_4 | GPIO_PIN_5);
+  gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+  gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
+  while (0 == gpio_input_bit_get(GPIOA, GPIO_PIN_7))
+  {
+    delay_1ms(150);
+    gpio_bit_set(GPIOC, GPIO_PIN_5);
+    delay_1ms(150);
+    gpio_bit_reset(GPIOC, GPIO_PIN_5);
+  }
+  gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+  delay_1ms(700);
+  gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+
   uint8_t spicmds[5] = {SPICMD_SETSPEEDS, 40, 40, 40, 40};
   gpio_bit_reset(GPIOB, GPIO_PIN_6);
   delay_1ms(1);
@@ -209,7 +224,41 @@ int main(void)
       }
       delay_1ms(1);
       gpio_bit_set(GPIOB, GPIO_PIN_6);
-      delay_1ms(1000);
+      stopped = 1;
+      gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+      delay_1ms(500);
+      gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+      delay_1ms(500);
+      gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+      delay_1ms(500);
+      gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+    }
+    if (0 == gpio_input_bit_get(GPIOA, GPIO_PIN_7) && !stopped)
+    {
+      gpio_bit_reset(GPIOB, GPIO_PIN_6);
+      delay_1ms(1);
+      spicmds[1] = 0;
+      spicmds[2] = 0;
+      spicmds[3] = 0;
+      spicmds[4] = 0;
+      for (uint8_t i = 0; i < 5; i++)
+      {
+        while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE))
+        {
+          ;
+        }
+        spi_i2s_data_transmit(SPI2, spicmds[i]);
+      }
+      while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TRANS))
+      {
+        ;
+      }
+      delay_1ms(1);
+      gpio_bit_set(GPIOB, GPIO_PIN_6);
+      stopped = 1;
+      gpio_bit_set(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
+      delay_1ms(500);
+      gpio_bit_reset(GPIOC, GPIO_PIN_4 | GPIO_PIN_5);
     }
   }
 }
