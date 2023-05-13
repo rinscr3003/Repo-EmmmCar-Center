@@ -169,6 +169,7 @@ timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_0,1500);
 				while(RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE)){;}
         spi_i2s_data_transmit(SPI2, spicmds[i]);
 				}
+				while(RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE)){;}
 				delay_1ms(1);
 				gpio_bit_set(GPIOB,GPIO_PIN_6);
 				uint8_t stopped=0;
@@ -184,6 +185,7 @@ timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_0,1500);
 				while(RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE)){;}
         spi_i2s_data_transmit(SPI2, spicmds[i]);
 				}
+				while(RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE)){;}
 				delay_1ms(1);
 				gpio_bit_set(GPIOB,GPIO_PIN_6);
 				stopped=1;
