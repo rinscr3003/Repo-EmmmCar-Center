@@ -83,6 +83,7 @@ int main(void)
 
   BSP_FDetect_Init();
   BSP_SPI_Init();
+	BSP_SPI_AllBrake();
   BSP_LEDBUZ_Init();
   BSP_LineFind_Init();
 
@@ -101,26 +102,35 @@ int main(void)
   delay_1ms(1000);
   BSP_FDetect_SetAngle(0);
 
-  BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 1);
+  //BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 1);
 
-  float speeds[4] = {4.0, 4.0, 4.0, 4.0};
-  BSP_SPI_SetSpeeds(speeds);
+  float speeds[4] = {4.0, -4.0, 4.0, -4.0};
+	BSP_SPI_SetSPIDState(0);
+  BSP_SPI_SetMotorPWM(0,800,0);
+	BSP_SPI_SetMotorPWM(1,800,1);
+	BSP_SPI_SetMotorPWM(2,800,0);
+	BSP_SPI_SetMotorPWM(3,800,1);
+	delay_1ms(1600);
+	BSP_SPI_SetSPIDState(0x01);
+	delay_1ms(5);
+  BSP_SPI_AllBrake();
+	
 
   uint8_t stopped = 0;
   while (1)
   {
-    if (BSP_FDetect_Read() && !stopped)
-    {
-      BSP_SPI_AllBrake();
-      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 300, 3);
-      stopped = 1;
-    }
-    if (getSysPeriod() >= 15000 && !stopped)
-    {
-      BSP_SPI_AllBrake();
-      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
-      stopped = 1;
-    }
+//    if (BSP_FDetect_Read() && !stopped)
+//    {
+//      BSP_SPI_AllBrake();
+//      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 300, 3);
+//      stopped = 1;
+//    }
+//    if (getSysPeriod() >= 15000 && !stopped)
+//    {
+//      BSP_SPI_AllBrake();
+//      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
+//      stopped = 1;
+//    }
   }
 }
 
