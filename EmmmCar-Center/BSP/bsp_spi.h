@@ -24,7 +24,7 @@ typedef enum
 } _SPIPROC_CMDCODE;
 
 void BSP_SPI_Init();
-void BSP_SPI_SetMotorPWM(uint8_t motorId, uint16_t pwm);
+void BSP_SPI_SetMotorPWM(uint8_t motorId, uint16_t pwm, uint8_t direction);
 void BSP_SPI_SetGivenSpeed(uint8_t motorId, float givenSpeed);
 void BSP_SPI_SetSpeeds(float *speeds);
 void BSP_SPI_AllBrake();

@@ -2,6 +2,7 @@
 #include "gd32f30x.h"
 #include <stdint.h>
 #include "systick.h"
+#include <math.h>
 
 /*
  * BSP - SPI
@@ -33,11 +34,12 @@ void BSP_SPI_Init()
     spi_enable(SPI2);
 }
 
-void BSP_SPI_SetMotorPWM(uint8_t motorId, uint16_t pwm)
+void BSP_SPI_SetMotorPWM(uint8_t motorId, uint16_t pwm, uint8_t direction)
 {
     uint8_t pwmh = pwm >> 8;
     uint8_t pwml = pwm & 0x00ff;
-    uint8_t spicmds[4] = {SPICMD_SETGIVENSPEED, motorId, pwmh, pwml};
+    pwmh = (pwmh & 0x7f) | (direction ? 0x80 : 0x00);
+    uint8_t spicmds[4] = {SPICMD_SETMOTORPWM, motorId, pwmh, pwml};
     gpio_bit_reset(GPIOB, GPIO_PIN_6);
     delay_1ms(1);
     for (uint8_t i = 0; i < 4; i++)
@@ -59,7 +61,7 @@ void BSP_SPI_SetMotorPWM(uint8_t motorId, uint16_t pwm)
 
 void BSP_SPI_SetGivenSpeed(uint8_t motorId, float givenSpeed)
 {
-    uint8_t mSpd = (uint8_t)(givenSpeed * 10.0f) & 0x7f;
+    uint8_t mSpd = (uint8_t)(fabs(givenSpeed) * 10.0f) & 0x7f;
     uint8_t spd = mSpd | ((givenSpeed < 0) ? 0x80 : 0x00);
     uint8_t spicmds[3] = {SPICMD_SETGIVENSPEED, motorId, spd};
     gpio_bit_reset(GPIOB, GPIO_PIN_6);
@@ -86,7 +88,7 @@ void BSP_SPI_SetSpeeds(float *speeds)
     uint8_t spicmds[5] = {SPICMD_SETSPEEDS, 0, 0, 0, 0};
     for (uint8_t i = 0; i < 4; i++)
     {
-        uint8_t mSpd = (uint8_t)(speeds[i] * 10.0f) & 0x7f;
+        uint8_t mSpd = (uint8_t)(fabs(speeds[i]) * 10.0f) & 0x7f;
         uint8_t spd = mSpd | ((speeds[i] < 0) ? 0x80 : 0x00);
         spicmds[1 + i] = spd;
     }
