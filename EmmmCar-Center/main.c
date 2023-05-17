@@ -44,6 +44,7 @@ OF SUCH DAMAGE.
 #include "bsp_spi.h"
 #include "bsp_ledbuz.h"
 #include "bsp_linefind.h"
+#include "director.h"
 
 void gd_log_com_init()
 {
@@ -95,6 +96,10 @@ int main(void)
   printf("\r\nCK_APB1 is %d", rcu_clock_freq_get(CK_APB1));
   printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
 
+  rcu_periph_clock_enable(RCU_GPIOC);
+  gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_13);
+  gpio_bit_set(GPIOC, GPIO_PIN_13);
+
   delay_1ms(1000);
   BSP_FDetect_SetAngle(-90);
   delay_1ms(1000);
@@ -102,7 +107,7 @@ int main(void)
   delay_1ms(1000);
   BSP_FDetect_SetAngle(0);
 
-  BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 1);
+  BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
 
   // float speeds[4] = {4.0, 4.0, 4.0, 4.0};
   //  BSP_SPI_SetSPIDState(0);
@@ -115,23 +120,22 @@ int main(void)
   delay_1ms(5);
   BSP_SPI_AllBrake();
 
-  uint8_t stopped = 0;
+  Director_ThisState state;
+  Director_Init(&state, POS_START);
+
+  uint32_t lastPeriod = getSysPeriod();
   while (1)
   {
-
-    // delay_1ms(5);
-    //     if (BSP_FDetect_Read() && !stopped)
-    //     {
-    //       BSP_SPI_AllBrake();
-    //       BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 300, 3);
-    //       stopped = 1;
-    //     }
-    //     if (getSysPeriod() >= 15000 && !stopped)
-    //     {
-    //       BSP_SPI_AllBrake();
-    //       BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
-    //       stopped = 1;
-    //     }
+    Director_Loop(&state);
+    if (getSysPeriod() - lastPeriod >= 1000)
+    {
+      gpio_bit_set(GPIOC, GPIO_PIN_13);
+      lastPeriod = getSysPeriod();
+    }
+    else if (getSysPeriod() - lastPeriod >= 500)
+    {
+      gpio_bit_reset(GPIOC, GPIO_PIN_13);
+    }
   }
 }
 

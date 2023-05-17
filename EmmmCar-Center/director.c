@@ -4,6 +4,7 @@
 #include "bsp_linefind.h"
 #include "bsp_spi.h"
 #include "systick.h"
+#include "stdint.h"
 
 /*
  * Director
@@ -199,10 +200,242 @@ void _Director_AggressiveLineFollow()
 
 void Director_Loop(Director_ThisState *thisState)
 {
+  BSP_LineFind_Result lineRes;
+  static uint32_t _c0_timestamp = 0;
   switch (thisState->steps)
   {
-  case 0:
 
+    /*
+    POS_START, // 0
+    POS_BRANCH_3_1,
+    POS_BRANCH_4_1,
+    POS_TUNNEL_1,
+    POS_ANGLES_RIGHT,
+    */
+  case 0:
+  {
+    _Director_AggressiveLineFollow();
+    if (BSP_FDetect_Read())
+    {
+      if (_c0_timestamp == 0)
+        _c0_timestamp = getSysPeriod();
+    }
+    if (_c0_timestamp != 0 && (getSysPeriod() - _c0_timestamp) >= 1000)
+    {
+      BSP_SPI_AllBrake();
+      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
+      delay_1ms(100);
+      _Director_PosShift(thisState, _route[thisState->steps + 1]);
+      thisState->steps++;
+    }
+  }
+  break;
+
+  case 1:
+  case 2:
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 3:
+    BSP_SPI_SetMotorPWM(0, 350, 0);
+    BSP_SPI_SetMotorPWM(1, 350, 0);
+    BSP_SPI_SetMotorPWM(2, 350, 0);
+    BSP_SPI_SetMotorPWM(3, 350, 0);
+    while (1)
+    {
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L4 == 1 && lineRes.L3 == 1 && lineRes.L2 == 1)
+      {
+        break;
+      }
+    }
+    BSP_FDetect_SetAngle(90);
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 550, 1);
+      BSP_SPI_SetMotorPWM(1, 550, 0);
+      BSP_SPI_SetMotorPWM(2, 550, 1);
+      BSP_SPI_SetMotorPWM(3, 550, 0);
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L2 == 1 && lineRes.L1 == 1 && lineRes.R1 == 0)
+      {
+        break;
+      }
+    }
+    while (1)
+    {
+      _Director_AggressiveLineFollow();
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 4)
+      {
+        break;
+      }
+    }
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 4:
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+    /*
+    POS_ANGLES_INSIDE, // 5
+    POS_ANGLES_LEFT,
+    POS_BRANCH_5_1,
+    POS_BRANCH_4_3,
+    POS_LOOP_TOP,
+    */
+
+  case 5:
+    BSP_SPI_AllBrake();
+    uint8_t _barrier3 = 0;
+    for (int8_t i = 55; i >= 0; i--)
+    {
+      BSP_FDetect_SetAngle(i);
+      if (BSP_FDetect_Read())
+      {
+        _barrier3 = 1;
+        BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 250, 3);
+        break;
+      }
+      delay_1ms(10);
+    }
+    if (_barrier3)
+    {
+      // Barrier 3 exists
+      _c0_timestamp = getSysPeriod();
+      while (1)
+      {
+        BSP_SPI_SetMotorPWM(0, 550, 1);
+        BSP_SPI_SetMotorPWM(1, 550, 0);
+        BSP_SPI_SetMotorPWM(2, 550, 1);
+        BSP_SPI_SetMotorPWM(3, 550, 0);
+        if (getSysPeriod() - _c0_timestamp >= 500)
+        {
+          break;
+        }
+      }
+      while (1)
+      {
+        _Director_AggressiveLineFollow();
+        lineRes = BSP_Linefind_Read();
+        if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 4)
+        {
+          break;
+        }
+      }
+      BSP_SPI_AllBrake();
+      while (1)
+      {
+        ;
+      }
+    }
+    else
+    {
+      // Barrier 3 not exists
+      BSP_SPI_AllBrake();
+      delay_1ms(100);
+      _c0_timestamp = getSysPeriod();
+      while (1)
+      {
+        BSP_SPI_SetMotorPWM(0, 550, 0);
+        BSP_SPI_SetMotorPWM(1, 550, 1);
+        BSP_SPI_SetMotorPWM(2, 550, 0);
+        BSP_SPI_SetMotorPWM(3, 550, 1);
+        if (getSysPeriod() - _c0_timestamp >= 500)
+        {
+          break;
+        }
+      }
+      while (1)
+      {
+        _Director_AggressiveLineFollow();
+        lineRes = BSP_Linefind_Read();
+        if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 4)
+        {
+          break;
+        }
+      }
+      BSP_SPI_AllBrake();
+      // No more barriers.
+      while (1)
+      {
+        BSP_SPI_SetMotorPWM(0, 450, 1);
+        BSP_SPI_SetMotorPWM(1, 450, 0);
+        BSP_SPI_SetMotorPWM(2, 450, 1);
+        BSP_SPI_SetMotorPWM(3, 450, 0);
+        lineRes = BSP_Linefind_Read();
+        if (lineRes.L1 == 1 && lineRes.R1 == 1 && lineRes.R2 == 0)
+        {
+          break;
+        }
+      }
+      _c0_timestamp = getSysPeriod();
+      while (1)
+      {
+        _Director_AggressiveLineFollow();
+        lineRes = BSP_Linefind_Read();
+        if (getSysPeriod() - _c0_timestamp >= 500 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 4)
+        {
+          break;
+        }
+      }
+      delay_1ms(150);
+      _c0_timestamp = getSysPeriod();
+      while (1)
+      {
+        BSP_SPI_SetMotorPWM(0, 550, 0);
+        BSP_SPI_SetMotorPWM(1, 550, 1);
+        BSP_SPI_SetMotorPWM(2, 550, 0);
+        BSP_SPI_SetMotorPWM(3, 550, 1);
+        if (getSysPeriod() - _c0_timestamp >= 350)
+        {
+          break;
+        }
+      }
+    }
+
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 6:
+
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 7:
+    while (1)
+    {
+      _Director_AggressiveLineFollow();
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L4 == 1 && lineRes.L3 == 1 && lineRes.L2 == 1)
+      {
+        break;
+      }
+    }
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 550, 1);
+      BSP_SPI_SetMotorPWM(1, 550, 0);
+      BSP_SPI_SetMotorPWM(2, 550, 1);
+      BSP_SPI_SetMotorPWM(3, 550, 0);
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L2 == 1 && lineRes.L1 == 1 && lineRes.R1 == 0)
+      {
+        break;
+      }
+    }
+
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 8:
     _Director_PosShift(thisState, _route[thisState->steps + 1]);
     thisState->steps++;
     break;
@@ -210,7 +443,8 @@ void Director_Loop(Director_ThisState *thisState)
   default:
     while (1)
     {
-      BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 100);
+      BSP_SPI_AllBrake();
+      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 250, 100);
     }
   }
 }

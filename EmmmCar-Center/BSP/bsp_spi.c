@@ -113,24 +113,10 @@ void BSP_SPI_SetSpeeds(float *speeds)
 
 void BSP_SPI_AllBrake()
 {
-    uint8_t spicmds[5] = {SPICMD_SETSPEEDS, 0, 0, 0, 0};
-    gpio_bit_reset(GPIOB, GPIO_PIN_6);
-    delay_1ms(1);
-    for (uint8_t i = 0; i < 5; i++)
-    {
-        while (RESET == spi_i2s_flag_get(SPI2, SPI_FLAG_TBE))
-        {
-            ;
-        }
-        spi_i2s_data_transmit(SPI2, spicmds[i]);
-    }
-    while (SET == spi_i2s_flag_get(SPI2, SPI_FLAG_TRANS))
-    {
-        ;
-    }
-    delay_1ms(1);
-    gpio_bit_set(GPIOB, GPIO_PIN_6);
-    delay_1ms(5);
+    BSP_SPI_SetMotorPWM(0,0,0);
+    BSP_SPI_SetMotorPWM(1,0,0);
+    BSP_SPI_SetMotorPWM(2,0,0);
+    BSP_SPI_SetMotorPWM(3,0,0);
 }
 
 void BSP_SPI_SetSPIDState(uint8_t pidOn)

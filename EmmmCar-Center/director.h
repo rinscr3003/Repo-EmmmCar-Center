@@ -68,6 +68,9 @@ typedef struct
     uint16_t steps;
 } Director_ThisState;
 
+void _Director_NormalLineFollow();
+void _Director_AggressiveLineFollow();
+
 void Director_Init(Director_ThisState *thisState, Director_PosState posState);
 void Director_Loop(Director_ThisState *thisState);
 
