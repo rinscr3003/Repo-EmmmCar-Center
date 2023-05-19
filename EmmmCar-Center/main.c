@@ -107,7 +107,7 @@ int main(void)
   delay_1ms(1000);
   BSP_FDetect_SetAngle(0);
 
-  BSP_LEDBUZ_Flash(BSP_LEDBUZ_BOTH, 500, 2);
+  BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 2);
 
   // float speeds[4] = {4.0, 4.0, 4.0, 4.0};
   //  BSP_SPI_SetSPIDState(0);
@@ -122,6 +122,8 @@ int main(void)
 
   Director_ThisState state;
   Director_Init(&state, POS_START);
+
+  //state.steps=27;
 
   uint32_t lastPeriod = getSysPeriod();
   while (1)
