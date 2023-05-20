@@ -123,11 +123,12 @@ int main(void)
   Director_ThisState state;
   Director_Init(&state, POS_START);
 
-  //state.steps=27;
+  //state.steps=7;
 
   uint32_t lastPeriod = getSysPeriod();
   while (1)
   {
+		//_Director_LoopLineFollow();
     Director_Loop(&state);
     if (getSysPeriod() - lastPeriod >= 1000)
     {

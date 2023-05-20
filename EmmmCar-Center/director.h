@@ -70,6 +70,7 @@ typedef struct
 
 void _Director_NormalLineFollow();
 void _Director_AggressiveLineFollow();
+void _Director_LoopLineFollow();
 
 void Director_Init(Director_ThisState *thisState, Director_PosState posState);
 void Director_Loop(Director_ThisState *thisState);
