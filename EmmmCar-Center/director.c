@@ -556,7 +556,8 @@ void Director_Loop(Director_ThisState *thisState)
           break;
         }
       }
-      BSP_SPI_AllBrake();
+      // use aggressive to run
+      /*BSP_SPI_AllBrake();
       _c0_timestamp = getSysPeriod();
       while (1)
       {
@@ -569,7 +570,7 @@ void Director_Loop(Director_ThisState *thisState)
         {
           break;
         }
-      }
+      }*/
     }
 
     _Director_PosShift(thisState, _route[thisState->steps + 1]);
@@ -586,7 +587,7 @@ void Director_Loop(Director_ThisState *thisState)
     {
       _Director_AggressiveLineFollow();
       lineRes = BSP_Linefind_Read();
-      if (lineRes.L4 == 1 && lineRes.L3 == 1 && lineRes.L2 == 1)
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
       {
         break;
       }
@@ -662,7 +663,7 @@ void Director_Loop(Director_ThisState *thisState)
     {
       _Director_LoopLineFollow();
       lineRes = BSP_Linefind_Read();
-      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 6)
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 5)
       {
         break;
       }
@@ -681,7 +682,7 @@ void Director_Loop(Director_ThisState *thisState)
       BSP_SPI_SetMotorPWM(2, 650, 1);
       BSP_SPI_SetMotorPWM(3, 650, 0);
       lineRes = BSP_Linefind_Read();
-      if (getSysPeriod() - _c0_timestamp >= 150 && lineRes.L2 == 1 && lineRes.L1 == 1 && lineRes.R1 == 0)
+      if (getSysPeriod() - _c0_timestamp >= 250 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 <= 4)
       {
         break;
       }
@@ -691,7 +692,7 @@ void Director_Loop(Director_ThisState *thisState)
     {
       _Director_AggressiveLineFollow();
       lineRes = BSP_Linefind_Read();
-      if (getSysPeriod() - _c0_timestamp >= 50 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
+      if (getSysPeriod() - _c0_timestamp >= 100 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
       {
         break;
       }
@@ -937,7 +938,7 @@ void Director_Loop(Director_ThisState *thisState)
       BSP_SPI_SetMotorPWM(2, 650, 0);
       BSP_SPI_SetMotorPWM(3, 650, 1);
       lineRes = BSP_Linefind_Read();
-      if (getSysPeriod() - _c0_timestamp >= 250)
+      if (getSysPeriod() - _c0_timestamp >= 200 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 <= 4)
       {
         break;
       }
@@ -947,7 +948,7 @@ void Director_Loop(Director_ThisState *thisState)
     {
       _Director_AggressiveLineFollow();
       lineRes = BSP_Linefind_Read();
-      if (getSysPeriod() - _c0_timestamp >= 50 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
+      if (getSysPeriod() - _c0_timestamp >= 100 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
       {
         break;
       }
@@ -982,7 +983,7 @@ void Director_Loop(Director_ThisState *thisState)
     }
     while (1)
     {
-      _Director_AggressiveLineFollow();
+      _Director_LoopLineFollow();
       lineRes = BSP_Linefind_Read();
       if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
       {
@@ -1001,10 +1002,10 @@ void Director_Loop(Director_ThisState *thisState)
 
     /*
     POS_BARRIERS_RIGHT, // 30
+    POS_BRANCH_4_1,
+    POS_BRANCH_3_1,
+    POS_BRANCH_3_2,
     POS_BRANCH_2_1,
-    POS_VISITSITE,
-    POS_BRANCH_2_1,
-    POS_BRANCH_2_2,
     */
 
   case 30:
@@ -1054,12 +1055,281 @@ void Director_Loop(Director_ThisState *thisState)
     {
       _Director_AggressiveLineFollow();
       lineRes = BSP_Linefind_Read();
-      if (lineRes.L2 == 1 && lineRes.L3 == 1 && lineRes.R1 == 1)
+      if (lineRes.R3 == 1 && lineRes.R4 == 1)
       {
         break;
       }
     }
     BSP_SPI_AllBrake();
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 32:
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 0);
+      BSP_SPI_SetMotorPWM(1, 600, 1);
+      BSP_SPI_SetMotorPWM(2, 600, 0);
+      BSP_SPI_SetMotorPWM(3, 600, 1);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 350 && lineRes.R1 == 1 && lineRes.R2 == 1 && lineRes.R3 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    while (1)
+    {
+      _Director_AggressiveLineFollow();
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L3 == 1 && lineRes.L4 == 1)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 33:
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 1);
+      BSP_SPI_SetMotorPWM(1, 600, 0);
+      BSP_SPI_SetMotorPWM(2, 600, 1);
+      BSP_SPI_SetMotorPWM(3, 600, 0);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 350 && lineRes.L1 == 1 && lineRes.L2 == 1 && lineRes.L3 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    while (1)
+    {
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 8)
+      {
+        break;
+      }
+      _Director_AggressiveLineFollow();
+    }
+    while (1)
+    {
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 8)
+      {
+        break;
+      }
+      BSP_SPI_SetMotorPWM(0, 600, 0);
+      BSP_SPI_SetMotorPWM(1, 600, 0);
+      BSP_SPI_SetMotorPWM(2, 600, 0);
+      BSP_SPI_SetMotorPWM(3, 600, 0);
+    }
+    BSP_SPI_SetMotorPWM(0, 600, 0);
+    BSP_SPI_SetMotorPWM(1, 600, 0);
+    BSP_SPI_SetMotorPWM(2, 600, 0);
+    BSP_SPI_SetMotorPWM(3, 600, 0);
+    delay_1ms(400);
+    BSP_SPI_AllBrake();
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 34:
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+    /*
+    POS_VISITSITE, // 35
+    POS_BRANCH_2_1,
+    POS_BRANCH_2_2,
+    POS_PARKING_1,
+    POS_BRANCH_2_3,
+    */
+
+  case 35:
+    BSP_FDetect_SetAngle(-90);
+    delay_1ms(1000);
+    BSP_FDetect_SetAngle(90);
+    delay_1ms(1000);
+    BSP_FDetect_SetAngle(0);
+    BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 2);
+    BSP_LEDBUZ_Flash(BSP_LEDBUZ_BUZ, 1000, 1);
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 350, 1);
+      BSP_SPI_SetMotorPWM(1, 350, 1);
+      BSP_SPI_SetMotorPWM(2, 350, 1);
+      BSP_SPI_SetMotorPWM(3, 350, 1);
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 <= 6)
+      {
+        break;
+      }
+    }
+    while (1)
+    {
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.R3 == 1 && lineRes.R4 == 1)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    delay_1ms(500);
+    lineRes = BSP_Linefind_Read();
+    if (lineRes.R3 == 0 && lineRes.R4 == 0)
+    {
+      while (1)
+      {
+        _Director_AggressiveLineFollow();
+        lineRes = BSP_Linefind_Read();
+        if (lineRes.R3 == 1 && lineRes.R4 == 1)
+        {
+          break;
+        }
+      }
+    }
+    BSP_SPI_AllBrake();
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 36:
+    BSP_FDetect_SetAngle(-90);
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 0);
+      BSP_SPI_SetMotorPWM(1, 600, 1);
+      BSP_SPI_SetMotorPWM(2, 600, 0);
+      BSP_SPI_SetMotorPWM(3, 600, 1);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 100 && lineRes.R1 == 1 && lineRes.R2 == 1 && lineRes.R3 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 0);
+      BSP_SPI_SetMotorPWM(1, 600, 1);
+      BSP_SPI_SetMotorPWM(2, 600, 0);
+      BSP_SPI_SetMotorPWM(3, 600, 1);
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 <= 4)
+      {
+        break;
+      }
+    }
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 0);
+      BSP_SPI_SetMotorPWM(1, 600, 1);
+      BSP_SPI_SetMotorPWM(2, 600, 0);
+      BSP_SPI_SetMotorPWM(3, 600, 1);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 150 && lineRes.L1 == 1 && lineRes.L2 == 1 && lineRes.R1 == 0)
+      {
+        break;
+      }
+    }
+    while (1)
+    {
+      _Director_AggressiveLineFollow();
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.R1 == 1 && lineRes.R2 == 1 && lineRes.R3 == 1 && lineRes.R4 == 1 && lineRes.L3 == 0 && lineRes.L4 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 37:
+    if (BSP_FDetect_Read())
+    {
+      // car on parking slot 1, skip next step
+      _Director_PosShift(thisState, _route[thisState->steps + 2]);
+      thisState->steps += 2;
+    }
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 38:
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 1);
+      BSP_SPI_SetMotorPWM(1, 600, 0);
+      BSP_SPI_SetMotorPWM(2, 600, 1);
+      BSP_SPI_SetMotorPWM(3, 600, 0);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 500 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 350, 0);
+      BSP_SPI_SetMotorPWM(1, 350, 0);
+      BSP_SPI_SetMotorPWM(2, 350, 0);
+      BSP_SPI_SetMotorPWM(3, 350, 0);
+      lineRes = BSP_Linefind_Read();
+      if (lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 >= 4)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 600, 0);
+      BSP_SPI_SetMotorPWM(1, 600, 1);
+      BSP_SPI_SetMotorPWM(2, 600, 0);
+      BSP_SPI_SetMotorPWM(3, 600, 1);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 300)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      BSP_SPI_SetMotorPWM(0, 350, 1);
+      BSP_SPI_SetMotorPWM(1, 350, 1);
+      BSP_SPI_SetMotorPWM(2, 350, 1);
+      BSP_SPI_SetMotorPWM(3, 350, 1);
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 350 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
+    _Director_PosShift(thisState, _route[thisState->steps + 1]);
+    thisState->steps++;
+    break;
+
+  case 39:
     _Director_PosShift(thisState, _route[thisState->steps + 1]);
     thisState->steps++;
     break;
