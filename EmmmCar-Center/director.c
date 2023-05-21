@@ -60,24 +60,27 @@ const static Director_PosState _route[] = {
     POS_BARRIERS_INSIDE,
 
     POS_BARRIERS_RIGHT, // 30
+    POS_BRANCH_4_1,
+    POS_BRANCH_3_1,
+    POS_BRANCH_3_2,
     POS_BRANCH_2_1,
-    POS_VISITSITE,
+
+    POS_VISITSITE, // 35
     POS_BRANCH_2_1,
     POS_BRANCH_2_2,
-
-    POS_PARKING_1, // 35
+    POS_PARKING_1,
     POS_BRANCH_2_3,
-    POS_PARKING_2,
+
+    POS_PARKING_2, // 40
     POS_BRANCH_2_4,
     POS_PARKING_3,
-
-    POS_BRANCH_2_5, // 40
+    POS_BRANCH_2_5,
     POS_TUNNEL_3,
-    POS_BRANCH_1_1,
+
+    POS_BRANCH_1_1, // 45
     POS_SPECIALZONE,
     POS_BRANCH_1_1,
-
-    POS_REDUCER, // 45
+    POS_REDUCER,
     POS_START};
 
 void _Director_PosShift(Director_ThisState *thisState, Director_PosState targetState)
@@ -278,6 +281,7 @@ void Director_Loop(Director_ThisState *thisState)
     {
       BSP_SPI_AllBrake();
       BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 2);
+      BSP_LEDBUZ_Flash(BSP_LEDBUZ_BUZ, 1000, 1);
       delay_1ms(100);
       _Director_PosShift(thisState, _route[thisState->steps + 1]);
       thisState->steps++;
@@ -353,7 +357,6 @@ void Director_Loop(Director_ThisState *thisState)
       if (BSP_FDetect_Read())
       {
         _barrier3 = 1;
-        // BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 250, 3);
         break;
       }
       delay_1ms(10);
@@ -406,7 +409,6 @@ void Director_Loop(Director_ThisState *thisState)
         if (BSP_FDetect_Read())
         {
           _barrier1 = 1;
-          // BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 250, 3);
           break;
         }
         delay_1ms(10);
@@ -714,7 +716,6 @@ void Director_Loop(Director_ThisState *thisState)
         break;
       }
     }
-    // BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 100, 1);
     delay_1ms(110);
     _c0_timestamp = getSysPeriod();
     while (1)
@@ -726,7 +727,6 @@ void Director_Loop(Director_ThisState *thisState)
         break;
       }
     }
-    // BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 100, 1);
     delay_1ms(50);
     BSP_SPI_AllBrake();
     _Director_PosShift(thisState, _route[thisState->steps + 1]);
@@ -792,6 +792,7 @@ void Director_Loop(Director_ThisState *thisState)
   case 15:
   case 25:
     BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 2);
+    BSP_LEDBUZ_Flash(BSP_LEDBUZ_BUZ, 1000, 1);
     delay_1ms(100);
     _c0_timestamp = getSysPeriod();
     while (1)
@@ -825,7 +826,6 @@ void Director_Loop(Director_ThisState *thisState)
         break;
       }
     }
-    // BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 50, 1);
     _Director_PosShift(thisState, _route[thisState->steps + 1]);
     thisState->steps++;
     break;
