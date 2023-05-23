@@ -1140,6 +1140,17 @@ void Director_Loop(Director_ThisState *thisState)
       }
     }
     BSP_SPI_AllBrake();
+    _c0_timestamp = getSysPeriod();
+    while (1)
+    {
+      _Director_AggressiveLineFollow();
+      lineRes = BSP_Linefind_Read();
+      if (getSysPeriod() - _c0_timestamp >= 100 && lineRes.L1 + lineRes.L2 + lineRes.L3 + lineRes.L4 + lineRes.R1 + lineRes.R2 + lineRes.R3 + lineRes.R4 == 0)
+      {
+        break;
+      }
+    }
+    BSP_SPI_AllBrake();
     _Director_PosShift(thisState, _route[thisState->steps + 1]);
     thisState->steps++;
     break;
