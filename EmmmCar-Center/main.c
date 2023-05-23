@@ -124,7 +124,7 @@ int main(void)
   Director_ThisState state;
   Director_Init(&state, POS_START);
 
-  state.steps = 27;
+  state.steps = 31;
 
   uint32_t lastPeriod = getSysPeriod();
   while (1)
