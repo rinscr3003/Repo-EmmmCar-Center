@@ -53,18 +53,12 @@ typedef enum
     POS_UNREACHABLE_INDEX = 1919810
 } Director_PosState;
 
-typedef enum
-{
-    LOOP_LEFT = 0,
-    LOOP_RIGHT,
-} Director_LoopSide;
-
 typedef struct
 {
     Director_PosState lastState;
     Director_PosState nowState;
     Director_PosState nextState;
-    Director_LoopSide lastLoopSide;
+    uint8_t parked;
     uint16_t steps;
 } Director_ThisState;
 
