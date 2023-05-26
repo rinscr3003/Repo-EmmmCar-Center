@@ -100,13 +100,22 @@ int main(void)
   gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_13);
   gpio_bit_set(GPIOC, GPIO_PIN_13);
 
-  delay_1ms(1000);
+  delay_1ms(100);
+
+  while (BSP_FDetect_Read() == 0)
+  {
+    ;
+  }
+  delay_1ms(50);
+  while (BSP_FDetect_Read() == 1)
+  {
+    ;
+  }
   BSP_FDetect_SetAngle(-90);
   delay_1ms(1000);
   BSP_FDetect_SetAngle(90);
   delay_1ms(1000);
   BSP_FDetect_SetAngle(0);
-
   BSP_LEDBUZ_Flash(BSP_LEDBUZ_LED, 500, 2);
   BSP_LEDBUZ_Flash(BSP_LEDBUZ_BUZ, 1000, 1);
 
@@ -124,7 +133,7 @@ int main(void)
   Director_ThisState state;
   Director_Init(&state, POS_START);
 
-  //state.steps = 31;
+  // state.steps = 31;
 
   uint32_t lastPeriod = getSysPeriod();
   while (1)
