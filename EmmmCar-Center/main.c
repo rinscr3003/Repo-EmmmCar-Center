@@ -113,6 +113,8 @@ int main(void)
   }
   BSP_FDetect_SetAngle(-90);
   delay_1ms(1000);
+  BSP_FDetect_SetAngle(0);
+  delay_1ms(1000);
   BSP_FDetect_SetAngle(90);
   delay_1ms(1000);
   BSP_FDetect_SetAngle(0);
